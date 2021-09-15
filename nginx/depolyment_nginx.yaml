@@ -10,7 +10,6 @@ spec:
   selector:
     matchLabels:
       app: nginx
-      tier: frontend
   strategy:
     type: RollingUpdate
     rollingUpdate:
