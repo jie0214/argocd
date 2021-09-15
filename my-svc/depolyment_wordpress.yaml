@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
         - name: wordpress
-          image: wordpress
+          image: nginx:1.15
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
@@ -36,11 +36,11 @@ spec:
             requests:
               cpu: 20m
               memory: 100Mi
-          envFrom:
-            - configMapRef:
-              name: wordpress-conf
-            - secretRef:
-              name: wordpress-secret
+          # envFrom:
+          #   - configMapRef:
+          #     name: wordpress-conf
+          #   - secretRef:
+          #     name: wordpress-secret
             # - name: WORDPRESS_DB_HOST
             #   value: wordpress-mysql-svc
             # - name: WORDPRESS_DB_USER
