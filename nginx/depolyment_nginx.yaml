@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: jie
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+      tier: frontend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.15
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: 100m
+              memory: 500Mi
+            requests:
+              cpu: 20m
+              memory: 100Mi
+
+            # - name: WORDPRESS_DB_HOST
+            #   value: wordpress-mysql-svc
+            # - name: WORDPRESS_DB_USER
+            #   value: exampleuser
+            # - name: WORDPRESS_DB_PASSWORD
+            #   value: examplepass
+            # - name: WORDPRESS_DB_NAME
+            #   value: exampledb
+
+
+      #     volumeMounts:
+      #       - name: mysql-conf
+      #         mountPath: "/etc/env"
+      # volumes:
+      #   - name: mysql-conf
+      #     configMap:
+      #       name: mysql-conf
