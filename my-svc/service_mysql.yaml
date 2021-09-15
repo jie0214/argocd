@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress-mysql-svc
+  namespace: jie
+  labels:
+     app: wordpress-mysql-svc
+spec:
+  clusterIP: None
+  #type: LoadBalancer
+  #loadBalancerSourceRanges:
+  #  - 18.139.105.233/32
+  #  - 114.41.50.203/32 #辦公室 ip
+  ports:
+  - port: 3306
+    protocol: TCP
+    targetPort: 3306
+  selector:
+    app: mysql
+    tier: db

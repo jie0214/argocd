@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress-svc
+  namespace: jie
+  labels:
+     app: wordpress
+spec:
+  type: LoadBalancer
+  # loadBalancerSourceRanges:
+  #   - 18.139.105.233/32
+  #   - 36.233.127.101/32 #辦公室 ip
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: wordpress
+    tier: frontend
