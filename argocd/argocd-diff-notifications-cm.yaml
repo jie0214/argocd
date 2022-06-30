@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-notifications-cm
+  namespace: w1-argocd
+data:
+  service.webhook.dev: |
+    url: https://hooks.slack.com/services/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
+    headers:
+      - name: Content-Type
+        value: application/json
+  service.webhook.uat: |
+    url: https://hooks.slack.com/services/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
+    headers:
+      - name: Content-Type
+        value: application/json
+  context: |
+    argocdUrl: https://status.5168royal.com/argo-cd
+  template.slack-dev: |
+    webhook:
+      slack:
+        method: POST
+        body: |
+          {
+            "attachments": [{
+              "title": "{{.app.metadata.name}}",
+              "title_link": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+              "color": "#18be52",
+              "fields": [{
+                "title": "Sync Status",
+                "value": "{{.app.status.sync.status}}",
+                "short": true
+              }, {
+                "title": "Repository",
+                "value": "{{.app.spec.source.repoURL}}",
+                "short": true
+              }]
+            }]
+          }
+  template.slack-uat: |
+    webhook:
+      slack:
+        method: POST
+        body: |
+          {
+            "attachments": [{
+              "title": "{{.app.metadata.name}}",
+              "title_link": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+              "color": "#18be52",
+              "fields": [{
+                "title": "Sync Status",
+                "value": "{{.app.status.sync.status}}",
+                "short": true
+              }, {
+                "title": "Repository",
+                "value": "{{.app.spec.source.repoURL}}",
+                "short": true
+              }]
+            }]
+          }
+  trigger.on-deployed: |
+    - description: Application is synced and healthy. Triggered once per commit.
+      #oncePer: app.status.sync.revision
+      send: [slcak-dev]  # template names
+      # trigger condition
+      when: app.spec.project == 'default' and app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy'
+  trigger.on-sync-running: |
+    - description: Application is being synced
+      send: [slcak-dev]  # template names
+      when: app.spec.project == 'default' and app.status.operationState.phase in ['Running']
+  trigger.on-sync-failed: |
+    - description: Application syncing has failed
+      send: [slcak-dev]  # template names
+      when: app.spec.project == 'default' and app.status.operationState.phase in ['Error', 'Failed']
+  trigger.on-sync-succeeded: |
+    - description: Application syncing has succeeded
+      send: [slcak-dev]  # template names
+      when: app.spec.project == 'default' and app.status.operationState.phase in ['Succeeded']
+  trigger.uat-deployed: |
+    - description: Application is synced and healthy. Triggered once per commit.
+      #oncePer: app.status.sync.revision
+      send: [slcak-uat]  # template names
+      # trigger condition
+      when: app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy'
+  trigger.uat-sync-running: |
+    - description: Application is being synced
+      send: [slcak-uat]  # template names
+      when: app.status.operationState.phase in ['Running']
+  trigger.uat-sync-failed: |
+    - description: Application syncing has failed
+      send: [slcak-uat]  # template names
+      when: app.status.operationState.phase in ['Error', 'Failed']
+  trigger.uat-sync-succeeded: |
+    - description: Application syncing has succeeded
+      send: [slcak-uat]  # template names
+      when: app.status.operationState.phase in ['Succeeded']
+  subscriptions: |
+    - recipients: [dev]  # 可能有bug，正常应该是webhook:dingtalk
+      triggers: [on-sync-running,on-sync-failed,on-sync-succeeded]
+    - recipients: [uat]
+      triggers: [uat-sync-running,uat-sync-failed,uat-sync-succeeded]
